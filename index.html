@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>평경코인 OX 퀴즈</title>
+<style>
+  :root{
+    --o:#2563eb; --x:#ef4444; --ok:#16a34a; --bg:#0f172a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:#1e293b; /* PC 좌우 여백 영역 */
+    display:flex;justify-content:center;align-items:stretch;
+  }
+  /* 모바일 화면 프레임: PC에서는 가운데 정렬 + 좌우 여백 */
+  #app{
+    width:100%;max-width:430px;min-height:100vh;
+    background:linear-gradient(160deg,#0f172a,#1e3a8a);
+    color:#fff;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .screen{flex:1;display:none;flex-direction:column;padding:24px;}
+  .screen.active{display:flex}
+
+  /* 시작 화면 */
+  #start{justify-content:center;align-items:center;text-align:center;gap:18px}
+  #start .coin{font-size:64px}
+  #start h1{font-size:26px;margin:0;line-height:1.4}
+  #start p{margin:0;opacity:.8;font-size:14px;line-height:1.6}
+  .btn{
+    border:none;border-radius:16px;padding:16px 28px;font-size:18px;font-weight:700;
+    cursor:pointer;color:#fff;transition:transform .1s;
+  }
+  .btn:active{transform:scale(.96)}
+  #startBtn{background:#fbbf24;color:#1e293b;font-size:20px;padding:18px 48px;margin-top:8px;box-shadow:0 8px 24px rgba(251,191,36,.4)}
+
+  /* 진행 헤더 */
+  .topbar{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;margin-bottom:10px}
+  .timebar-wrap{height:8px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;margin-bottom:24px}
+  #timebar{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#fbbf24,#ef4444);border-radius:99px}
+
+  /* 문제 */
+  #quiz{justify-content:flex-start}
+  .badge{align-self:flex-start;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-bottom:18px}
+  .badge.must{background:#fbbf24;color:#1e293b}
+  #qtext{font-size:24px;font-weight:700;line-height:1.5;flex:1;display:flex;align-items:center}
+  .answers{display:flex;gap:14px;margin-top:auto}
+  .ans{flex:1;height:120px;border-radius:24px;font-size:48px;font-weight:800;border:none;cursor:pointer;color:#fff;transition:transform .1s}
+  .ans:active{transform:scale(.95)}
+  .ans.o{background:var(--o)}
+  .ans.x{background:var(--x)}
+  .answers.locked .ans{pointer-events:none}
+  /* 정답 여부를 O/X 버튼에 직접 표시 (강조) */
+  .answers.locked .ans{opacity:.18;filter:grayscale(.6)}
+  .ans.correct{opacity:1!important;filter:none!important;background:var(--ok);
+    box-shadow:0 0 0 6px rgba(22,163,74,.45),0 0 30px rgba(22,163,74,.8);
+    animation:correctPulse .5s ease-out}
+  .ans.wrong{opacity:1!important;filter:none!important;background:var(--x);
+    box-shadow:0 0 0 6px rgba(239,68,68,.45),0 0 30px rgba(239,68,68,.8);
+    animation:wrongShake .45s}
+  .ans .mark{position:absolute;top:6px;right:14px;font-size:40px;font-weight:900;
+    text-shadow:0 2px 6px rgba(0,0,0,.4);animation:markPop .35s ease-out}
+  .ans{position:relative}
+  @keyframes correctPulse{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1.06)}}
+  @keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+  @keyframes markPop{0%{transform:scale(0)}70%{transform:scale(1.4)}100%{transform:scale(1)}}
+
+  /* 결과 */
+  #result{justify-content:center;align-items:center;text-align:center;gap:14px}
+  #result .coin{font-size:56px}
+  #result h2{font-size:22px;margin:0}
+  #score{font-size:64px;font-weight:900;color:#fbbf24}
+  #result p{opacity:.85;margin:0;font-size:15px;line-height:1.6}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 1. 시작 -->
+  <section id="start" class="screen active">
+    <div class="coin">🪙</div>
+    <h1>웰컴 투 경영과,<br>'평경코인'으로 부자 되자!</h1>
+    <p>경제·금융 상식 OX 퀴즈 서바이벌<br>총 20문제 · 제한시간 1분</p>
+    <button id="startBtn" class="btn">시작하기</button>
+    <p style="font-size:12px">미래융합경영과</p>
+  </section>
+
+  <!-- 2. 퀴즈 -->
+  <section id="quiz" class="screen">
+    <div class="topbar">
+      <span id="progress">1 / 20</span>
+      <span id="time">⏱ 60초</span>
+    </div>
+    <div class="timebar-wrap"><div id="timebar"></div></div>
+    <span id="badge" class="badge">문제</span>
+    <div id="qtext"></div>
+    <div class="answers" id="answers">
+      <button class="ans o" data-v="O">O</button>
+      <button class="ans x" data-v="X">X</button>
+    </div>
+  </section>
+
+  <!-- 3. 결과 -->
+  <section id="result" class="screen">
+    <div class="coin">🎉</div>
+    <h2>퀴즈 종료!</h2>
+    <div id="score">0 / 20</div>
+    <p id="resultMsg"></p>
+    <button id="retryBtn" class="btn" style="background:#fbbf24;color:#1e293b">다시 도전</button>
+  </section>
+
+</div>
+
+<script>
+// ── 문제 은행 ──────────────────────────────────────────
+// 필수문제 5개 (항상 앞에 출제)
+const MUST = [
+  ["미래융합경영과는 한국은행, 신용보증기금, 철도공사 등 공기업에 취업하였다.", true],
+  ["미래융합경영과는 선취업 후진학으로 경희대, 경기대, 한양대 등에 진학하였다.", true],
+  ["미래융합경영과는 일반전형으로 경기대 소프트웨어경영과에 합격하였다.", true],
+  ["미래융합경영과는 9급공무원 행정직, 세무직에 취업하였다.", true],
+  ["미래융합경영과는 삼성서울병원 원무직, 롯데케미칼 등 대기업에 취업하였다.", true],
+];
+
+// 세트별 문제 (세트당 하나씩 골고루 뽑아 15문제 구성)
+const SETS = [
+  [ // 금융 기초 및 저축
+    ["예금은 돈을 맡기는 것, 적금은 돈을 모으는 것이다.",true],
+    ["은행에 돈을 맡기면 보관료를 내야 한다.",false],
+    ["복리는 이자에 이자가 또 붙는 방식이다.",true],
+    ["신용카드는 통장에 잔액이 없어도 결제 가능하다.",true],
+    ["체크카드는 결제 즉시 통장에서 돈이 빠져나간다.",true],
+    ["이율이 높을수록 내가 받을 이자는 많아진다.",true],
+    ["대출은 은행에서 돈을 저축하는 행위다.",false],
+    ["이자는 빌린 돈에 대해 지불하는 대가다.",true],
+    ["신용점수가 낮을수록 대출 이자가 낮아진다.",false],
+    ["통장 비밀번호는 생년월일로 하는 것이 가장 안전하다.",false],
+    ["'마이너스 통장'은 빌린 돈만큼 이자를 내는 통장이다.",true],
+    ["뱅크런(Bank Run)은 은행에 돈을 찾으러 올 때 달려오는 것을 말한다.",false],
+    ["예금자 보호법에 의해 한 은행당 1억 원까지 보호받는다.",true],
+    ["주택청약저축은 집을 분양받기 위해 가입하는 저축이다.",true],
+    ["은행 창구 직원은 고객의 돈을 사적으로 쓸 수 있다.",false],
+    ["'금리'는 돈의 가치를 나타내는 지표 중 하나다.",true],
+    ["세계 최초의 은행은 이탈리아에서 시작되었다.",true],
+    ["한국은행은 개인 고객이 일반 예금을 맡길 수 있는 곳이다.",false],
+    ["'핀테크'는 금융과 기술이 결합한 서비스를 뜻한다.",true],
+    ["돈이 없어서 쩔쩔매는 사람들이 모인 곳은 '빈민가'이다.",true],
+  ],
+  [ // 주식과 투자
+    ["주식은 회사의 소유권을 나누어 가진 증권이다.",true],
+    ["주식 투자는 원금이 100% 보장되는 안전 자산이다.",false],
+    ["'개미'는 주식 시장의 개인 투자자를 뜻한다.",true],
+    ["배당금은 기업이 이익을 주주들에게 나누어 주는 돈이다.",true],
+    ["코스피(KOSPI) 지수가 오르면 우리나라 전체 주가가 오른 셈이다.",true],
+    ["주식은 비쌀 때 사서 쌀 때 파는 것이 수익의 기본이다.",false],
+    ["상장(Listing)은 주식이 시장에서 거래되도록 등록하는 것이다.",true],
+    ["손절매는 손해를 보고서라도 주식을 파는 것이다.",true],
+    ["블루칩은 수익성과 성장성이 높은 우량주를 말한다.",true],
+    ["작전주란 인위적으로 주가를 조작하는 불법적인 주식이다.",true],
+    ["펀드는 전문가에게 돈을 맡겨 대신 투자하게 하는 것이다.",true],
+    ["분산 투자는 '계란을 한 바구니에 담지 마라'는 뜻이다.",true],
+    ["코스닥(NASDAQ)은 미국의 대표적인 기술주 시장이다.",false],
+    ["주가가 오를 것으로 예상해 주식을 사는 것을 '매도'라고 한다.",false],
+    ["주식 시장은 전 세계 공통으로 24시간 내내 열려 있다.",false],
+    ["'황소'는 주가가 오르는 상승장을 상징한다.",true],
+    ["'곰'은 주가가 내리는 하락장을 상징한다.",true],
+    ["상한가는 하루 동안 주가가 오를 수 있는 최대치(한국 기준 30%)다.",true],
+    ["워런 버핏은 가치 투자자로 유명한 세계적 부자다.",true],
+    ["돈을 먹고 사는 짐승은 '돼지저금통'이다.",true],
+  ],
+  [ // 기업 경영 및 마케팅
+    ["CEO는 기업의 최고 경영자를 의미한다.",true],
+    ["기업의 목적은 이윤 창출이며, 세금은 내지 않는다.",false],
+    ["스타트업은 혁신적 기술을 가진 신생 벤처기업이다.",true],
+    ["SK하이닉스는 대한민국에서 시가총액이 가장 큰 기업이다.",false],
+    ["유니콘 기업은 가치가 1조 원 이상인 비상장 기업이다.",true],
+    ["기업이 사회에 공헌하는 활동을 하지 않아도 된다.",false],
+    ["마케팅은 소비자의 욕구를 파악해 제품을 파는 활동이다.",true],
+    ["프랜차이즈는 본사의 노하우를 빌려 운영하는 가맹점이다.",true],
+    ["브랜드 로고는 소비자에게 기업의 이미지를 각인시킨다.",true],
+    ["애플의 로고는 스티브 잡스가 사과를 먹다가 만들었다.",false],
+    ["기업이 부도나도 주주는 주인이니까 주금을 받을 수 있다.",false],
+    ["M&A는 기업을 사고파는 인수와 합병을 뜻한다.",true],
+    ["'독점'은 한 기업이 시장을 지배해 경쟁자가 없는 상태다.",true],
+    ["스타벅스 로고 속 인물은 그리스 신화의 인어다.",true],
+    ["넷플릭스는 구독료를 받고 영상을 보는 서비스다.",false],
+    ["기업은 개인과 마찬가지로 법인세를 낼 의무가 있다.",true],
+    ["벤처 기업은 고위험 고수익을 노리는 기술 중심 기업이다.",true],
+    ["구조조정은 경영 효율을 위해 조직을 개편하는 것이다.",true],
+    ["스티브 잡스와 엘론 머스크는 대표적인 혁신가들이다.",true],
+    ["도둑이 가장 싫어하는 아이스크림은 '누가바'이다.",true],
+  ],
+  [ // 물가, 환율 및 글로벌 경제
+    ["디플레이션은 물가가 지속적으로 오르는 현상이다.",false],
+    ["물가가 급격히 오르면 화폐의 구매력은 떨어진다.",true],
+    ["수요가 공급보다 많으면 가격이 내린다.",false],
+    ["공급이 수요보다 많으면 가격이 내려간다.",true],
+    ["'기회비용'은 선택 시 포기한 것 중 가장 값진 가치다.",true],
+    ["시장 경제에서 가격은 보이지 않는 손에 의해 결정된다.",true],
+    ["디플레이션은 물가가 지속적으로 하락하는 현상이다.",true],
+    ["환율은 국가 간 화폐를 맞바꾸는 비율이다.",true],
+    ["미국 달러 환율이 내리면 수입 물가가 비싸진다.",false],
+    ["환율이 오르면 수출 기업에게 대체로 유리하다.",true],
+    ["최저임금은 나라가 정한 근로자의 최대 급여 수준이다.",false],
+    ["자유 무역(FTA)은 국가 간 무역 장벽을 낮추는 것이다.",true],
+    ["엥겔지수는 총지출에서 식료품비가 차지하는 비율이다.",true],
+    ["소득이 높을수록 엥겔지수가 높은 경향이 있다.",false],
+    ["독점 시장에서는 소비자의 선택권이 제한된다.",true],
+    ["이상 기후로 농사가 망하면 농산물 가격이 폭등한다.",true],
+    ["금값이 오르는 것은 안전 자산을 선호하기 때문이다.",true],
+    ["금융 시장은 노동력을 거래하는 시장이다.",false],
+    ["경제학의 아버지라 불리는 사람은 애덤 스미스다.",true],
+    ["떡볶이 가게 사장님이 가장 싫어하는 말은 '다 불었네'다.",true],
+  ],
+  [ // 화폐 인물 및 세금
+    ["우리나라 1,000원권 인물은 퇴계 이황이다.",true],
+    ["5,000원권 인물은 신사임당이다.",false],
+    ["10,000원권 인물은 세종대왕이다.",true],
+    ["50,000원권 인물은 율곡 이이이다.",false],
+    ["10원 동전 앞면의 그림은 다보탑이다.",true],
+    ["100원 동전 인물은 충무공 이순신이다.",true],
+    ["500원 동전 그림은 장수를 상징하는 학(두루미)이다.",true],
+    ["한국조폐공사는 화폐뿐만 아니라 여권도 만든다.",true],
+    ["지폐에는 홀로그램 등 다양한 위조 방지 장치가 있다.",true],
+    ["반 이상 탄 지폐도 남은 면적에 따라 보상받을 수 있다.",true],
+    ["우리가 편의점에서 사는 물건값에는 세금이 포함되어 있다.",true],
+    ["부가가치세는 보통 물건값의 5%가 붙는다.",false],
+    ["세금은 국방, 치안, 교육 등 공공 서비스에 쓰인다.",true],
+    ["소득이 높을수록 높은 세율의 세금을 내는 제도가 있다.",true],
+    ["'연말정산'은 1년 동안 낸 세금을 확인해 돌려받거나 더 내는 절차다.",true],
+    ["로또 당첨금이 3억을 넘으면 약 33%를 세금으로 낸다.",true],
+    ["관세는 외국에 파는 수출품에 매기는 세금이다.",false],
+    ["탈세는 세금을 줄이기 위해 수입을 속이는 불법 행위다.",true],
+    ["기부를 하면 세금 혜택을 받을 수 있는 제도가 있다.",true],
+    ["세상에서 가장 싸게 먹히는 세금은 '미세먼지'다.",false],
+  ],
+  [ // 소비 습관 및 생활 경제
+    ["'가성비'는 가격보다 심리적 만족을 우선하는 소비다.",false],
+    ["유통기한은 먹어도 되는 기한이 아니라 '판매' 가능한 기한이다.",true],
+    ["'노쇼(No-Show)'는 사회적 비용을 발생시키는 민폐 행동이다.",true],
+    ["과대 포장은 환경 오염뿐만 아니라 소비자 가격을 높인다.",true],
+    ["블랙 먼데이는 추수감사절 다음 날 열리는 세일 행사다.",false],
+    ["광고 모델의 몸값은 제품 가격에 영향을 줄 수 있다.",true],
+    ["백화점 매장에는 고객이 시간 가는 줄 모르게 창문이 많다.",false],
+    ["9,990원 같은 가격 설정은 소비자에게 싸게 느끼게 한다.",true],
+    ["리셀(Resell)은 한정판 제품을 웃돈을 얹어 되파는 것이다.",true],
+    ["'욜로(YOLO)'는 미래보다 현재의 즐거움을 위해 소비하는 경향이다.",true],
+    ["충동구매를 줄이려면 배고플 때 쇼핑하는 것이 좋다.",false],
+    ["멤버십 포인트는 기업이 고객을 붙잡아두는 마케팅 전략이다.",true],
+    ["렌탈 서비스는 정기적인 비용을 내고 제품을 빌려 쓰는 것이다.",true],
+    ["중고 거래에서 사기를 예방하려면 직거래가 가장 권장된다.",true],
+    ["영수증은 환불이나 교환 시 필수적인 증빙 서류다.",true],
+    ["명절에 물가가 오르는 것은 공급이 급격히 늘기 때문이다.",false],
+    ["신용카드를 과도하게 쓰면 신용불량자가 될 수 있다.",true],
+    ["용돈 기입장은 내 지출 현황을 파악하는 가장 쉬운 방법이다.",true],
+    ["저축은 미래의 불확실성에 대비하는 경제 활동이다.",true],
+    ["장사를 가장 잘하는 동물은 '판다'이다.",true],
+  ],
+  [ // 미래 금융과 가상 자산
+    ["비트코인은 국가가 발행하지 않는 디지털 암호화폐다.",true],
+    ["블록체인은 데이터를 분산 저장해 해킹을 막는 기술이다.",true],
+    ["NFT는 디지털 예술품 등의 소유권을 증명하는 토큰이다.",true],
+    ["모바일 뱅킹을 이용하면 은행에 가지 않고도 송금이 가능하다.",true],
+    ["삼성페이, 카카오페이 등은 간편 결제 서비스에 해당한다.",true],
+    ["인터넷 은행(카카오뱅크 등)은 오프라인 점포가 많아 편리하다.",false],
+    ["키오스크는 무인으로 주문과 결제를 돕는 기계다.",true],
+    ["미래에는 실물 지폐가 사라진 '현금 없는 사회'가 올 수 있다.",true],
+    ["오픈뱅킹은 한 앱에서 모든 은행 계좌를 조회하는 기능이다.",true],
+    ["크라우드 펀딩은 다수에게 소액을 모아 자금을 조달하는 것이다.",true],
+    ["로보어드바이저는 AI 알고리즘이 자산 관리를 돕는 것이다.",true],
+    ["디지털 화폐(CBDC)는 중앙은행이 직접 발행하려는 디지털 돈이다.",true],
+    ["핀테크(Fintech)는 금융과 기술의 결합을 뜻하는 용어다.",true],
+    ["가상화폐 투자는 주식과 달리 폐장 시간 없이 24시간 돌아간다.",true],
+    ["생체 인식(지문, 얼굴) 결제는 보안과 편의성을 동시에 잡은 기술이다.",true],
+    ["보이스피싱은 전화를 이용해 금융 정보를 빼내는 사기다.",true],
+    ["공인인증서 폐지 이후 간편 인증서 시대가 열렸다.",true],
+    ["가상화폐는 변동성이 커서 원금 손실 위험이 매우 높다.",true],
+    ["보안 카드는 사진을 찍어 폰에 보관하는 것이 가장 안전하다.",false],
+    ["컴퓨터가 가장 좋아하는 돈은 '캐시(Cache)'다.",true],
+  ],
+  [ // 경제 상식 및 속담
+    ["'공동구매'는 단체로 물건을 사서 단가를 낮추는 행위다.",true],
+    ["'경매'는 최고가를 제시한 사람이 물건을 차지하는 방식이다.",true],
+    ["알바를 시작할 때는 근로계약서를 작성하지 않아도 된다.",false],
+    ["'티끌 모아 태산'은 작은 저축의 소중함을 일깨워준다.",true],
+    ["'재테크'는 재산을 효율적으로 관리해 늘리는 기술이다.",true],
+    ["경제 신문을 읽으면 세상의 흐름을 파악하는 힘이 생긴다.",true],
+    ["적당한 소비는 기업의 생산을 도와 경제를 활성화한다.",true],
+    ["모든 국민이 돈을 전혀 안 쓰면 국가경제가 부자가 된다.",false],
+    ["기부는 부의 재분배를 돕는 가치 있는 경제 활동이다.",true],
+    ["'카푸어'는 수입에 비해 비싼 차를 사서 고생하는 사람을 뜻한다.",true],
+    ["금융권 취업을 위해서는 경제 상식이 필수적이다.",true],
+    ["저축은 사고나 질병 같은 미래의 위험에 대비하는 상품이다.",false],
+    ["주식 시장에서 '상한가'는 빨간색으로 표시된다.",true],
+    ["용돈은 무조건 다 쓰는 것보다 일부를 먼저 저축하는 게 좋다.",true],
+    ["경제 교육은 성인이 되어서 해야 이해도가 높아 좋다.",false],
+    ["황금알을 낳는 거위의 배를 가른 주인은 큰 부자가 되었다.",false],
+    ["자산에는 예금뿐만 아니라 부동산, 주식 등도 포함된다.",true],
+    ["은행 이름에 '농협', '수협' 등이 있는 것은 특정 분야를 지원하기 위해서다.",true],
+    ["면세점은 세금이 붙지 않은 물건을 파는 곳이다.",true],
+    ["세상에서 가장 행복한 도둑은 '월급 루팡'이다.",true],
+  ],
+  [ // 기업 역사 및 경제 유래
+    ["맥도날드의 로고 M은 창업자 형제의 성(McDonald)에서 왔다.",true],
+    ["스타벅스는 시애틀의 작은 커피점에서 시작된 글로벌 기업이다.",true],
+    ["아마존은 처음에 책을 파는 온라인 서점으로 시작했다.",true],
+    ["'레드 오션'은 경쟁자가 없는 새로운 시장을 의미한다.",false],
+    ["'레드 오션'은 경쟁이 매우 치열한 기존 시장을 의미한다.",true],
+    ["코카콜라의 상징적인 색깔은 파란색과 흰색이다.",false],
+    ["테슬라는 전기차뿐만 아니라 우주 사업도 병행하는 경영자가 운영한다.",true],
+    ["나이키의 로고 '스우시'는 승리의 여신 날개를 상징한다.",true],
+    ["'데드캣 바운스'는 하락장에서 주가가 잠시 튀어 오르는 현상이다.",true],
+    ["네덜란드는 과거 튤립 하나가 집 한 채 가격이었던 적이 있다.",true],
+    ["뱅크(Bank)의 어원은 이탈리아의 탁자 '방카(Banca)'다.",true],
+    ["최초의 종이 화폐는 7세기경 중국에서 사용되었다.",true],
+    ["산업혁명은 생산 방식을 기계 중심으로 바꾼 대사건이다.",true],
+    ["대공황은 전 세계적으로 경제가 매우 좋았던 시기를 말한다.",false],
+    ["유로화는 유럽 국가들의 경제 통합을 위해 만들어졌다.",true],
+    ["아시아 금융위기 당시 우리나라는 '금 모으기 운동'을 했다.",true],
+    ["네이버는 검색 엔진으로 시작해 세계적인 IT 기업이 되었다.",false],
+    ["페이스북(메타)은 대학생들의 인맥 관리용으로 시작되었다.",true],
+    ["노키아는 한때 세계 1위 휴대폰 기업이었으나 변화에 밀려 쇠퇴했다.",true],
+    ["세상에서 가장 무서운 상추는 '내 주식 상장폐지 상추'다.",false],
+  ],
+  [ // 금융 상식 종합 및 넌센스
+    ["신용점수는 빌린 돈을 갚는 능력과 정직함을 나타낸다.",true],
+    ["'복리'는 '72의 법칙'을 통해 자산이 10배가 되는 시간을 계산할 수 있다.",false],
+    ["금리가 낮을 때는 저축보다 투자에 관심이 쏠리는 경향이 있다.",true],
+    ["국가 부채는 나라가 다른 나라나 국민에게 빌린 빚이다.",true],
+    ["'지하 경제'는 세금을 내지 않고 음성적으로 이루어지는 거래다.",true],
+    ["소득 주도 성장은 가계의 소득을 늘려 경제를 키우려는 이론이다.",true],
+    ["공급망 위기는 물건을 만드는 재료 공급이 끊겨 가격이 떨어지는 것이다.",false],
+    ["경제적 자유는 일하지 않아도 생활이 가능할 정도의 자산을 갖는 것이다.",true],
+    ["신용카드를 긁을 때 나는 소리는 '돈 나가는 소리'다.",true],
+    ["주식 차트에서 빨간 선은 주가 상승을 의미한다.",true],
+    ["주식 차트에서 파란 선은 주가 하락을 의미한다.",true],
+    ["'손이 크다'는 말은 씀씀이가 크거나 인심이 좋다는 경제 관용구다.",true],
+    ["'밑 빠진 독에 물 붓기'는 효율성 없는 투자를 비판할 때 쓴다.",true],
+    ["부자가 되기 위해서는 '지출 관리'가 가장 기본이다.",true],
+    ["'개미지옥'은 주식에서 손해를 보고 나오지 못하는 상황을 빗댄다.",true],
+    ["5만원권 모델 신사임당의 아들 이이는 5,000원권 모델이다.",true],
+    ["세상에서 제일 비싼 음식은 '피 같은 내 돈'이다.",true],
+    ["퀴즈를 맞혀 얻은 평경코인은 부스 내에서 현금처럼 사용한다.",true],
+    ["오늘 퀴즈에 참여한 모든 팀은 이미 훌륭한 예비 경제인이다!",true],
+  ],
+];
+
+const TOTAL = 20, MUST_N = 5, PICK = 15, LIMIT = 60; // 초
+
+// ── 상태 ─────────────────────────────────────────────
+let quiz = [], idx = 0, score = 0, endAt = 0, tick = null;
+
+const $ = s => document.querySelector(s);
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+function buildQuiz(){
+  // 필수 5문제 (섞어서)
+  const must = shuffle(MUST.map(q => ({t:q[0],a:q[1]}))).slice(0,MUST_N);
+  // 세트당 하나씩 골고루: 세트 순서를 섞고 라운드로빈으로 15개 채움
+  const order = shuffle(SETS.map((_,i)=>i));
+  const pool = SETS.map(s => shuffle(s.slice()));
+  const picked = [];
+  let r = 0;
+  while(picked.length < PICK){
+    const set = pool[order[picked.length % order.length]];
+    // 같은 세트에서 라운드마다 다른 문제 뽑기
+    const q = set[r];
+    if(q){ picked.push({t:q[0],a:q[1]}); }
+    if((picked.length % order.length) === 0) r++;
+  }
+  quiz = must.concat(picked);
+}
+
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $('#'+id).classList.add('active'); }
+
+function startQuiz(){
+  buildQuiz(); idx = 0; score = 0;
+  show('quiz');
+  // 타이머: CSS transition으로 막대 줄이기
+  const bar = $('#timebar');
+  bar.style.transition='none'; bar.style.width='100%';
+  void bar.offsetWidth; // reflow
+  bar.style.transition='width '+LIMIT+'s linear';
+  bar.style.width='0%';
+  endAt = Date.now() + LIMIT*1000;
+  clearInterval(tick);
+  tick = setInterval(()=>{
+    const left = Math.max(0, Math.ceil((endAt - Date.now())/1000));
+    $('#time').textContent = '⏱ '+left+'초';
+    if(left<=0){ finish(); }
+  }, 200);
+  $('#time').textContent='⏱ '+LIMIT+'초';
+  render();
+}
+
+function render(){
+  const q = quiz[idx];
+  const must = idx < MUST_N;
+  $('#progress').textContent = (idx+1)+' / '+TOTAL;
+  $('#badge').textContent = must ? '필수문제 '+(idx+1) : '문제 '+(idx+1);
+  $('#badge').className = 'badge'+(must?' must':'');
+  $('#qtext').textContent = q.t;
+  const ans = $('#answers');
+  ans.classList.remove('locked');
+  ans.querySelectorAll('.ans').forEach(b=>{
+    b.classList.remove('correct','wrong');
+    const m = b.querySelector('.mark'); if(m) m.remove();
+  });
+}
+
+function answer(v){
+  const ans = $('#answers');
+  if(ans.classList.contains('locked')) return;
+  ans.classList.add('locked');
+  const correct = (v==='O') === quiz[idx].a;
+  if(correct) score++;
+  // 선택한 버튼엔 정/오 표시, 틀렸으면 정답 버튼도 함께 표시
+  const picked = ans.querySelector('.ans[data-v="'+v+'"]');
+  const answerBtn = ans.querySelector('.ans[data-v="'+(quiz[idx].a?'O':'X')+'"]');
+  picked.classList.add(correct?'correct':'wrong');
+  picked.insertAdjacentHTML('beforeend','<span class="mark">'+(correct?'✓':'✗')+'</span>');
+  if(!correct){ answerBtn.classList.add('correct'); answerBtn.insertAdjacentHTML('beforeend','<span class="mark">✓</span>'); }
+  setTimeout(()=>{
+    idx++;
+    if(idx>=TOTAL || Date.now()>=endAt){ finish(); }
+    else render();
+  }, 1200);
+}
+
+function finish(){
+  clearInterval(tick);
+  show('result');
+  $('#score').textContent = score+' / '+TOTAL;
+  let msg;
+  if(score===TOTAL) msg='완벽해요! 진정한 평경코인 부자! 🪙';
+  else if(score>=15) msg='훌륭해요! 예비 경제인 인증! 👍';
+  else if(score>=10) msg='좋아요! 조금만 더 공부하면 부자!';
+  else msg='괜찮아요, 다시 도전해서 평경코인을 모아요!';
+  $('#resultMsg').textContent = msg;
+}
+
+// ── 이벤트 ───────────────────────────────────────────
+$('#startBtn').addEventListener('click', startQuiz);
+$('#retryBtn').addEventListener('click', startQuiz);
+document.querySelectorAll('.ans').forEach(b=>b.addEventListener('click',()=>answer(b.dataset.v)));
+</script>
+</body>
+</html>
