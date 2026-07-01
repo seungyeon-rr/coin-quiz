@@ -6,24 +6,24 @@
 <title>평경코인 OX 퀴즈</title>
 <style>
   :root{
-    --primary:#4f46e5; --primary-soft:#eef2ff;
+    --primary:#fbbf24; --primary-soft:rgba(251,191,36,.14);
     --o:#3b82f6; --x:#ef4444; --ok:#22c55e;
-    --ink:#0f172a; --muted:#64748b; --line:#e5e9f0; --gold:#f59e0b;
+    --ink:#f8fafc; --muted:#94a3b8; --line:rgba(255,255,255,.16); --gold:#fbbf24;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-    background:#e9edf3; /* PC 좌우 여백 영역 */
+    background:#0b1220; /* PC 좌우 여백 영역 */
     color:var(--ink);
     display:flex;justify-content:center;align-items:stretch;
   }
   /* 모바일 화면 프레임: PC에서는 가운데 정렬 + 좌우 여백 */
   #app{
     width:100%;max-width:430px;min-height:100vh;
-    background:#fff;position:relative;overflow:hidden;
+    background:linear-gradient(160deg,#0f172a,#1e3a8a);position:relative;overflow:hidden;
     display:flex;flex-direction:column;
-    box-shadow:0 0 60px rgba(15,23,42,.08);
+    box-shadow:0 0 60px rgba(0,0,0,.5);
   }
   .screen{flex:1;display:none;flex-direction:column;padding:28px 24px;}
   .screen.active{display:flex}
@@ -33,13 +33,15 @@
   #start .coin{font-size:64px}
   #start h1{font-size:25px;margin:0;line-height:1.45;font-weight:800}
   #start p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
-  #start .dept{font-size:30px;font-weight:900;letter-spacing:.5px;color:var(--primary)}
+  #start .dept{font-size:30px;font-weight:900;letter-spacing:.5px;
+    background:linear-gradient(90deg,#fbbf24,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 12px rgba(251,191,36,.3)}
 
   /* 개인정보 입력 화면 */
   #info{justify-content:center;overflow-y:auto}
-  .card{width:100%;background:#fff;border:1px solid var(--line);
+  .card{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--line);
     border-radius:20px;padding:24px 20px;display:flex;flex-direction:column;gap:15px;
-    box-shadow:0 8px 24px rgba(15,23,42,.06)}
+    box-shadow:0 12px 32px rgba(0,0,0,.28)}
   .card .head{text-align:center;margin-bottom:2px}
   .card .head .ic{font-size:32px}
   .card .head h2{margin:8px 0 3px;font-size:20px;font-weight:800}
@@ -47,22 +49,22 @@
   .field{display:flex;flex-direction:column;gap:6px}
   .field label{font-size:12.5px;font-weight:600;color:var(--muted)}
   .field input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);
-    background:#fff;color:var(--ink);font-size:15px;transition:border-color .15s,box-shadow .15s}
-  .field input::placeholder{color:#b4bdca}
-  .field input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.15)}
+    background:rgba(255,255,255,.95);color:#0f172a;font-size:15px;transition:border-color .15s,box-shadow .15s}
+  .field input::placeholder{color:#94a3b8}
+  .field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(251,191,36,.3)}
   .row2{display:flex;gap:10px}
   .row2 .field{flex:1}
   .consent{display:flex;align-items:flex-start;gap:11px;background:var(--primary-soft);
     border-radius:12px;padding:13px 14px;cursor:pointer}
-  .consent input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--primary);flex:none}
+  .consent input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--gold);flex:none}
   .consent .txt{font-size:13px;line-height:1.5}
   .consent .txt b{font-weight:700}
   .consent .txt .sub{display:block;font-size:11px;color:var(--muted);margin-top:4px}
 
   .btn{
     border:none;border-radius:14px;padding:16px 28px;font-size:18px;font-weight:700;
-    cursor:pointer;color:#fff;background:var(--primary);transition:transform .1s,filter .1s;
-    box-shadow:0 6px 18px rgba(79,70,229,.28);
+    cursor:pointer;color:#1e293b;background:var(--gold);transition:transform .1s,filter .1s;
+    box-shadow:0 8px 24px rgba(251,191,36,.35);
   }
   .btn:active{transform:scale(.97)}
   #startBtn{font-size:19px;padding:17px 46px;margin-top:4px}
@@ -71,22 +73,22 @@
   /* 진행 헤더 */
   .topbar{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700;margin-bottom:10px;color:var(--muted)}
   #time{color:var(--ink)}
-  .timebar-wrap{height:9px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:26px}
-  #timebar{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);border-radius:99px}
+  .timebar-wrap{height:9px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;margin-bottom:26px}
+  #timebar{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#fbbf24,#ef4444);border-radius:99px}
 
   /* 문제 */
   #quiz{justify-content:flex-start}
-  .badge{align-self:flex-start;background:var(--primary-soft);color:var(--primary);
+  .badge{align-self:flex-start;background:rgba(255,255,255,.15);color:#fde68a;
     padding:5px 14px;border-radius:99px;font-size:12px;font-weight:700;margin-bottom:18px}
-  .badge.must{background:#fef3c7;color:#b45309}
+  .badge.must{background:var(--gold);color:#1e293b}
   #qtext{font-size:24px;font-weight:700;line-height:1.55;flex:1;display:flex;align-items:center;word-break:keep-all}
   .answers{display:flex;gap:14px;margin-top:auto}
   .ans{position:relative;flex:1;height:120px;border-radius:22px;font-size:48px;font-weight:800;
-    border:none;cursor:pointer;color:#fff;transition:transform .1s;box-shadow:0 6px 16px rgba(15,23,42,.12)}
+    border:none;cursor:pointer;color:#fff;transition:transform .1s;box-shadow:0 6px 16px rgba(0,0,0,.3)}
   .ans:active{transform:scale(.95)}
   .ans.o{background:var(--o)}
   .ans.x{background:var(--x)}
-  .answers.locked .ans{pointer-events:none;opacity:.28;filter:grayscale(.4)}
+  .answers.locked .ans{pointer-events:none;opacity:.22;filter:grayscale(.5)}
   /* 정답 여부를 O/X 버튼에 직접 표시 (강조) */
   .ans.correct{opacity:1!important;filter:none!important;background:var(--ok);
     box-shadow:0 0 0 5px rgba(34,197,94,.35),0 0 26px rgba(34,197,94,.6);
