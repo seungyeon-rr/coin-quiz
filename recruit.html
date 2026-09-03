@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>2027학년도 신입생 모집</title>
+<meta name="description" content="평촌경영고 미래융합경영과 2027학년도 신입생 모집 신청서">
+<meta property="og:type" content="website">
+<meta property="og:title" content="2027학년도 신입생 모집 - 평촌경영고 미래융합경영과">
+<meta property="og:description" content="평촌경영고 미래융합경영과 2027학년도 신입생 모집 신청서">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f3ec; --ink:#151313; --ink-soft:#6b6560;
+    --lime:#dcff4f; --lime-ink:#151313; --line:rgba(21,19,19,.14);
+    --coral:#ff5b48;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    font-family:'Gothic A1',-apple-system,"Apple SD Gothic Neo",sans-serif;
+    background:var(--paper); color:var(--ink);
+    display:flex;justify-content:center;
+    position:relative;
+  }
+  /* 종이 질감 grain */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  }
+  #app{width:100%;max-width:440px;min-height:100vh;position:relative;z-index:1;
+    padding:56px 24px 72px;
+  }
+  .fade{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  .tag{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--lime);
+    font-size:11.5px;font-weight:700;letter-spacing:.06em;padding:8px 14px;border-radius:99px;
+    animation-delay:.02s}
+  .tag .dot{width:6px;height:6px;border-radius:99px;background:var(--lime);animation:blink 1.6s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+  h1{font-family:'Black Han Sans',sans-serif;font-weight:400;letter-spacing:-.01em;
+    margin:18px 0 0;line-height:1.05;font-size:44px;color:var(--ink);animation-delay:.08s}
+  .dept{margin:16px 0 0;font-size:16px;font-weight:700;animation-delay:.14s}
+  .dept span{background:linear-gradient(180deg,transparent 62%,var(--lime) 62%)}
+
+  form{margin-top:38px;display:flex;flex-direction:column;gap:26px;animation-delay:.26s}
+  .field{position:relative;display:flex;flex-direction:column;gap:8px}
+  .field label{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase}
+  .field input{width:100%;border:none;border-bottom:1.5px solid var(--line);background:transparent;
+    padding:6px 2px 10px;font-family:inherit;font-size:19px;font-weight:700;color:var(--ink);
+    border-radius:0;transition:border-color .2s}
+  .field input::placeholder{color:#c9c3ba;font-weight:500}
+  .field input:focus{outline:none;border-bottom-color:var(--ink)}
+  .field input:focus + .underline,.field.focus .underline{transform:scaleX(1)}
+  .row2{display:flex;gap:18px}
+  .row2 .field{flex:1}
+
+  .consent{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding-top:6px}
+  .consent input{appearance:none;-webkit-appearance:none;width:21px;height:21px;flex:none;margin:1px 0 0;
+    border:1.5px solid var(--ink);border-radius:6px;position:relative;cursor:pointer;transition:background .15s}
+  .consent input:checked{background:var(--lime)}
+  .consent input:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:900;color:var(--ink)}
+  .consent .txt{font-size:13px;line-height:1.55;color:var(--ink-soft)}
+  .consent .txt b{color:var(--ink);font-weight:700}
+  .consent .txt .sub{display:block;font-size:11.5px;margin-top:3px}
+
+  .btn{margin-top:6px;border:1.5px solid var(--ink);border-radius:99px;padding:18px 28px;
+    font-family:inherit;font-size:16px;font-weight:900;letter-spacing:-.01em;cursor:pointer;
+    background:var(--ink);color:var(--paper);transition:transform .15s,background .15s,color .15s;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn:hover{background:var(--lime);color:var(--ink)}
+  .btn:active{transform:scale(.97)}
+
+  #done{display:none;flex-direction:column;align-items:flex-start;gap:16px;margin-top:60px}
+  #done .check{width:56px;height:56px;border-radius:99px;background:var(--lime);
+    display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}
+  #done h2{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:32px;margin:0;line-height:1.15}
+  #done p{margin:0;color:var(--ink-soft);font-size:14.5px;line-height:1.7}
+
+  footer{margin-top:56px;font-size:11px;color:#b9b2a7;letter-spacing:.04em;animation-delay:.32s}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <h1 class="fade">2027학년도<br>신입생 모집</h1>
+
+  <p class="dept fade">평촌경영고 <span>미래융합경영과</span></p>
+
+  <form id="card" class="fade">
+    <div class="field"><label>중학교 명</label><input id="f-school" type="text" placeholder="OO중학교"></div>
+    <div class="row2">
+      <div class="field"><label>학년</label><input id="f-grade" type="text" inputmode="numeric" maxlength="1" placeholder="3"></div>
+      <div class="field"><label>반</label><input id="f-class" type="text" inputmode="numeric" maxlength="2" placeholder="5"></div>
+    </div>
+    <div class="field"><label>이름</label><input id="f-name" type="text" placeholder="홍길동"></div>
+    <div class="field"><label>연락처</label><input id="f-phone" type="tel" inputmode="numeric" placeholder="010-0000-0000"></div>
+    <label class="consent">
+      <input id="f-consent" type="checkbox">
+      <span class="txt"><b>개인정보 수집 및 이용에 동의합니다.</b>
+        <span class="sub">입력하신 정보는 신입생 모집 안내 및 상담 목적으로만 활용되며, 목적 달성 후 즉시 파기됩니다.</span>
+      </span>
+    </label>
+    <button type="submit" class="btn">신청하기 →</button>
+  </form>
+
+  <div id="done">
+    <div class="check">✓</div>
+    <h2>신청 완료!</h2>
+    <p>관심 가져주셔서 감사합니다.</p>
+  </div>
+
+  <footer class="fade">평촌경영고등학교 미래융합경영과</footer>
+
+</div>
+<script>
+// 구글시트 연동: apps-script-recruit.gs 배포 후 웹앱 URL을 여기 붙여넣으세요.
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwO0-P-aG2wZ0DxwJ5QnuMyBezdnC6-1NI-8Z8dR3BmucNEHgC4pRzxCLYbmjIEeBFu/exec";
+
+const $ = s => document.querySelector(s);
+
+function fmtPhone(v){
+  const d = v.replace(/\D/g,'').slice(0,11);
+  if(d.length<4) return d;
+  if(d.length<7) return d.slice(0,3)+'-'+d.slice(3);
+  if(d.length<11) return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+  return d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7);
+}
+$('#f-phone').addEventListener('input', e=>{ e.target.value = fmtPhone(e.target.value); });
+
+$('#card').addEventListener('submit', e=>{
+  e.preventDefault();
+  const g = id => $('#'+id).value.trim();
+  const bad = (id,msg)=>{ alert(msg); $('#'+id).focus(); };
+
+  const school = g('f-school'), grade = g('f-grade'), cls = g('f-class'), name = g('f-name'), phone = g('f-phone');
+
+  if(school.length < 2) return bad('f-school','중학교 명을 정확히 입력해 주세요.');
+  if(!/^[1-3]$/.test(grade)) return bad('f-grade','학년은 1~3 사이 숫자로 입력해 주세요.');
+  if(!/^([1-9]|[1-9][0-9])$/.test(cls)) return bad('f-class','반은 숫자로 입력해 주세요.');
+  if(name.length < 2) return bad('f-name','이름을 2자 이상 정확히 입력해 주세요.');
+  const phoneDigits = phone.replace(/\D/g,'');
+  if(!/^010[0-9]{8}$/.test(phoneDigits)) return bad('f-phone','올바른 연락처를 입력해 주세요. (010-0000-0000 형식)');
+  if(!$('#f-consent').checked){ alert('개인정보 수집 및 이용에 동의해야 신청할 수 있습니다.'); return; }
+
+  const data = {school, grade, cls, name, phone: fmtPhone(phone), ts:new Date().toLocaleString('ko-KR')};
+  if(SHEET_URL){
+    fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)}).catch(()=>{});
+  }
+  $('#card').style.display='none';
+  $('#done').style.display='flex';
+});
+</script>
+</body>
+</html>
